@@ -1,11 +1,20 @@
-require('dotenv').config();
+const path = require('path');
+const dotenv = require('dotenv').config()
 const express = require('express');
+const mongoose = require('mongoose')
 const cors = require('cors');
-require('./db/mongoose')
 const URL = require('./models/url')
 
 const app = express();
 
+// connect to db
+mongoose.connect(process.env.DB_URI, {
+  useNewUrlParser: true,
+  useCreateIndex: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
+  autoIndex: true
+})
 
 // Basic Configuration
 const port = process.env.PORT;
@@ -23,8 +32,17 @@ app.get('/api/hello', function(req, res) {
   res.json({ greeting: 'hello API' });
 });
 
-app.post('/api/shorturl', (req, res) => {
-  
+// create short url endpoint
+app.post('/api/shorturl', async (req, res) => {
+  const url = new URL(req.body)
+  console.log(req)
+
+  try {
+    await url.save()
+    res.status(201).send({ original_url, short_url })
+  } catch (error) {
+    res.status(400).send(error)
+  }
 })
 
 app.listen(port, function() {

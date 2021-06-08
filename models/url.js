@@ -2,21 +2,30 @@ const mongoose = require('mongoose')
 const validator = require('validator')
 
 const urlSchema = new mongoose.Schema({
-    realUrl: {
+    original_url: {
         type: String,
         required: true,
         trim: true,
         lowercase: true,
         validate(url) {
             if (!validator.isURL(url)) {
-                throw new Error('You must enter a valid URL!')
+                throw new Error('invalid url')
             }
         }
     },
-    shortUrl: {
+    short_url: {
         type: Number,
-        required: true
+        required: true,
+        unique: true
     }
+})
+
+urlSchema.pre('save', async function (next) {
+    const url = this
+
+    url.short_url = URL.countDocuments({}) + 1
+
+    next()
 })
 
 const URL = mongoose.model('URL', urlSchema)
