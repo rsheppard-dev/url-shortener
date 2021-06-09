@@ -15,7 +15,6 @@ const urlSchema = new mongoose.Schema({
     },
     short_url: {
         type: Number,
-        required: true,
         unique: true
     }
 })
@@ -23,7 +22,7 @@ const urlSchema = new mongoose.Schema({
 urlSchema.pre('save', async function (next) {
     const url = this
 
-    url.short_url = URL.countDocuments({}) + 1
+    url.short_url = await URL.countDocuments({}) + 1
 
     next()
 })
