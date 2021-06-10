@@ -2,6 +2,7 @@ require('dotenv').config()
 const express = require('express');
 const mongoose = require('mongoose')
 const bodyParser = require ('body-parser')
+const validator = require('validator')
 const cors = require('cors');
 const URL = require('./models/url')
 
@@ -32,16 +33,27 @@ app.get('/', function(req, res) {
 app.post('/api/shorturl', async (req, res) => {
   const url = new URL(req.body)
 
+  if (!validator.isURL(url.original_url, { require_protocol: true })) {
+    return res.status(400).json({'error': 'invalid url'})
+  }
+
   try {
     const {original_url, short_url} = await url.save()
     
-    res.status(201).send({ original_url, short_url })
+    res.status(201).json({ original_url, short_url })
   } catch (error) {
-    res.status(400).send({
-      error: error.errors.original_url.properties.message
-    })
+    res.status(400).send(error)
   }
 })
+
+// use short url to redirect to original url endpoint
+app.get('/api/shorturl/:short_url', async (req, res) => {
+  const short_url = req.params.short_url
+  const url = await URL.findOne({short_url})
+  
+  res.redirect(url.original_url)
+})
+
 
 app.listen(port, function() {
   console.log(`Listening on port ${port}`);
