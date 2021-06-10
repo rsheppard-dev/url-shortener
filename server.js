@@ -31,7 +31,7 @@ app.get('/', function(req, res) {
 
 // create short url endpoint
 app.post('/api/shorturl', async (req, res) => {
-  const url = new URL(req.body)
+  const url = new URL({ original_url: req.body.url })
 
   if (!validator.isURL(url.original_url, { require_protocol: true })) {
     return res.status(400).json({'error': 'invalid url'})
@@ -51,6 +51,10 @@ app.get('/api/shorturl/:short_url', async (req, res) => {
   const short_url = req.params.short_url
   const url = await URL.findOne({short_url})
   
+  if (!url) {
+    return res.status(400).json({'error': 'invalid url'})
+  }
+
   res.redirect(url.original_url)
 })
 
