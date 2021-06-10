@@ -33,7 +33,7 @@ app.get('/', function(req, res) {
 app.post('/api/shorturl', async (req, res) => {
   const url = new URL({ original_url: req.body.url })
 
-  if (!validator.isURL(url.original_url, { require_protocol: true })) {
+  if (!validator.isURL(url.original_url)) {
     return res.status(400).json({'error': 'invalid url'})
   }
 
