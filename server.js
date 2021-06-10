@@ -61,7 +61,7 @@ app.get('/api/shorturl/:short_url', async (req, res) => {
   const url = await ShortUrl.findOne({short_url})
   
   if (!url) {
-    return res.status(400).json({'error': 'invalid url'})
+    return res.status(400).json({error: 'invalid url'})
   }
 
   res.redirect(url.original_url)
