@@ -4,7 +4,8 @@ const express = require('express');
 const mongoose = require('mongoose')
 const bodyParser = require ('body-parser')
 const cors = require('cors');
-const ShortUrl = require('./models/url')
+const ShortUrl = require('./models/url');
+const { validate } = require('./models/url');
 
 const app = express();
 
@@ -38,16 +39,20 @@ app.post('/api/shorturl', async (req, res) => {
     return res.status(400).json({ error: 'invalid url' })
   }
 
-  const urlObject = new URL(url.original_url)
+  const validateUrl = async () => {
+    return new Promise((resolve, reject) => {
+      const urlObject = new URL(url.original_url)
 
-  dns.lookup(urlObject.hostname, (error, address, family) => {
-    if (error) {
-      return res.status(400).json({ error: 'invalid url' })
-    }
-  })
+      dns.lookup(urlObject.hostname, (error, address, family) => {
+        if (error) reject({ error: 'invalid url' })
+        resolve(url.original_url)
+      })
+    })
+  }
 
   try {
-    const {original_url, short_url} = await url.save()
+    const original_url = await validateUrl()
+    const { short_url } = await url.save()
     
     res.status(201).json({ original_url, short_url })
   } catch (error) {
