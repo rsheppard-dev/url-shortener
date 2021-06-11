@@ -36,7 +36,7 @@ app.post('/api/shorturl', async (req, res) => {
   const httpRegex = /^(http|https)(:\/\/)/
 
   if (!httpRegex.test(url.original_url)) {
-    return res.status(400).json({ error: 'invalid url' })
+    return res.json({ error: 'invalid url' })
   }
 
   const validateUrl = async () => {
@@ -54,9 +54,9 @@ app.post('/api/shorturl', async (req, res) => {
     const original_url = await validateUrl()
     const { short_url } = await url.save()
     
-    res.status(201).json({ original_url, short_url })
+    res.json({ original_url, short_url })
   } catch (error) {
-    res.status(400).send(error)
+    res.send(error)
   }
 })
 
@@ -66,7 +66,7 @@ app.get('/api/shorturl/:short_url', async (req, res) => {
   const url = await ShortUrl.findOne({short_url})
   
   if (!url) {
-    return res.status(400).json({error: 'invalid url'})
+    return res.json({error: 'invalid url'})
   }
 
   res.redirect(url.original_url)
